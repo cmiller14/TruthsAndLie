@@ -6,49 +6,37 @@ import { io } from "socket.io-client";
 
 function App() {
   const [statements, setStatements] = useState([]);
-  const [lie, setLie] = useState('');
   const [selected, setSelected] = useState(null);
-  const [result, setResult] = useState('');
   const [inputFormOpen, setInputFormOpen] = useState(false);
-  const socket = io("http://localhost:3001"); // Express server's URL
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    // Fetch game data from the server
-    fetch('http://localhost:3001/api/game')
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        const shuffledStatements = [data.truth1, data.truth2, data.lie].sort(() => Math.random() - 0.5);
-        setStatements(shuffledStatements);
-        setLie(data.lie);
-      });
-  }, []);
-
-  useEffect(() => {
-    // Listen for backend confirmation
-    socket.on("formSubmissionResponse", (data) => {
-      console.log("Response from server:", data);
-    });
+    const s = io("http://localhost:3001");
+    setSocket(s);
     return () => {
-      socket.off("formSubmissionResponse");
+        s.disconnect();
     };
   }, []);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    const callback = (data) => {
+      console.log(data);
+      setStatements((prevStatements) => [...prevStatements, data]);
+      console.log(statements);
+    }
+
+    socket.on("newStatement", callback);
+    return () => {
+      socket.off("newStatement", callback);
+    };
+  }, [socket]);
+
 
   const handleSubmit = (formData) => {
-    console.log("Sending form data:", formData);
-
-    socket.emit("sendFormData", formData);
-
-  };
-
-  const handleSelection = (statement) => {
-    setSelected(statement);
-    if (statement === lie) {
-      setResult('Correct! That was the lie.');
-    } else {
-      setResult('Wrong! That was actually true.');
-    }
+    setStatements([...statements, formData]);
+    socket.emit("sendStatements", formData);
   };
 
   return (
@@ -66,14 +54,17 @@ function App() {
           {statements.map((statement, index) => (
             <button
               key={index}
-              onClick={() => handleSelection(statement)}
               className={selected === statement ? 'selected' : ''}
             >
-              {statement}
+              <div>
+              <strong>{statement.name}</strong>
+              </div>
+              <div>Truth 1: {statement.truth1}</div>
+              <div>Truth 2: {statement.truth2}</div>
+              <div>Lie: {statement.lie}</div>
             </button>
           ))}
         </div>
-        {result && <p className="result">{result}</p>}
       </header>
     </div>
   );

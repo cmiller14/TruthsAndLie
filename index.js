@@ -23,14 +23,6 @@ app.use(cors(corsOptions));
 // Middleware
 app.use(express.json());
 
-
-// Game data
-let gameData = {
-    truth1: "I like to poop.",
-    truth2: "I have climbed Mount Everest.",
-    lie: "I have been to space."
-};
-
 // API endpoint to get game data
 app.get('/api/game', (req, res) => {
     res.json(gameData);
@@ -40,11 +32,12 @@ app.get('/api/game', (req, res) => {
 // Listen for Socket.IO connections
 io.on("connection", (socket) => {  
     // Listen for form data from the client
-    socket.on("sendFormData", (formData) => {
-      console.log("Received form data:", formData);
+    socket.on("sendStatements", (formData) => {
+      console.log("Received statements data:", formData);
   
-      // Optional: Emit back a success message
-      socket.emit("formSubmissionResponse", { status: "success", message: "Form data received!" });
+      socket.emit("recievedStatement", "The statement was recieved.")
+      // emit the question to all other clients
+      socket.broadcast.emit("newStatement", formData);
     });
   
     // Handle disconnection
