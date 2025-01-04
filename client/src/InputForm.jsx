@@ -3,7 +3,7 @@ import "./inputForm.css";
 
 const InputForm = ({ isOpen, onClose, onSubmit}) => {
   if (!isOpen) return null; // Don't render the component if it's not open
-  const [formData, setFormData] = useState({ name: "", truth1: "", truth2: "", lie: ""});
+  const [formData, setFormData] = useState({ name: "", truth1: "", truth2: "", lie: "", guessed: false});
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import InputForm from './inputForm';
+import RandomizedStatements from './RandomizedStatements';
 import { io } from "socket.io-client";
 
 function App() {
@@ -51,19 +52,9 @@ function App() {
         </InputForm>
         <p>Can you spot the lie?</p>
         <div className="statements">
-          {statements.map((statement, index) => (
-            <button
-              key={index}
-              className={selected === statement ? 'selected' : ''}
-            >
-              <div>
-              <strong>{statement.name}</strong>
-              </div>
-              <div>Truth 1: {statement.truth1}</div>
-              <div>Truth 2: {statement.truth2}</div>
-              <div>Lie: {statement.lie}</div>
-            </button>
-          ))}
+          <RandomizedStatements
+            statements={statements}>
+          </RandomizedStatements>
         </div>
       </header>
     </div>
