@@ -1,0 +1,82 @@
+/* 🎨 Global Styles for Trivia Truth Trial */
+
+/* Import a fun Google Font */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(135deg, #f9f9f9, #f1f5ff);
+  color: #333;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Headings */
+h1, h2, h3 {
+  font-weight: 700;
+  color: #222;
+}
+
+/* Navbar (if you add one later) */
+nav {
+  background-color: #fff;
+  padding: 1rem;
+  border-bottom: 2px solid #eee;
+}
+
+/* Landing Page Buttons */
+.btn-primary {
+  background-color: #4a90e2;
+  border: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #357abd;
+  transform: scale(1.05);
+}
+
+.btn-success {
+  background-color: #34c759;
+  border: none;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-success:hover {
+  background-color: #28a745;
+  transform: scale(1.05);
+}
+
+/* Landing Page Container */
+.landing-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100vh;
+  background: url("https://www.transparenttextures.com/patterns/white-wall-3.png");
+  background-size: cover;
+}
+
+.landing-container h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #222;
+}
+
+.landing-container p {
+  font-size: 1.25rem;
+  max-width: 600px;
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+/* Utility */
+.shadow-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
