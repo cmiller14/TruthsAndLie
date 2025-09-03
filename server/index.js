@@ -1,32 +1,22 @@
 // server/index.js
-const express = require('express');
-const { Server } = require("socket.io");
-const cors = require('cors');
-const path = require('path');
-const http = require("http");
-const PORT = 3001;
-const corsOptions = {
-    origin: 'http://localhost:5173', // Allow requests from Vite
-    methods: ['GET', 'POST'], // Specify allowed HTTP methods
-    credentials: true, // If using cookies/auth
-};
+import express, { json } from 'express';
+import { Server } from "socket.io";
+import cors from 'cors';
+import { createServer } from "http";
+import gameRoutes from "./routes/gameRoutes.js";
 
+
+const PORT = process.env.PORT || 3000;
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: corsOptions
-});
-
+app.use(express.json())
 app.use(cors(corsOptions));
 
-// Middleware
-app.use(express.json());
+const server = createServer(app);
+const io = new Server(server);
 
-// API endpoint to get game data
-app.get('/api/game', (req, res) => {
-    res.json(gameData);
-});
+
+app.use("/api", gameRoutes);
 
 
 // Listen for Socket.IO connections
