@@ -1,12 +1,38 @@
 import { createGame, addPlayer, addQuestion } from "../models/gameModel.js";
 
+// Utility to generate a random game ID
+function generateGameCode(length = 6) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 export const createGameController = async (req, res) => {
   try {
-    const { gameCode } = req.body;
-    if (!gameCode) return res.status(400).json({ error: "gameCode is required" });
+    // Generate a unique code
+    let gameCode;
+    let gameCreated = null;
 
-    const game = await createGame(gameCode);
-    res.status(201).json(game);
+    // Loop until we find an unused code (to avoid collisions)
+    let tries = 0;
+    do {
+      gameCode = generateGameCode();
+      gameCreated = await createGame(gameCode); // your model creates & saves the game
+      tries++;
+    } while (!gameCreated && tries < 5);
+
+    if (!gameCreated) {
+      return res.status(500).json({ error: "Failed to generate unique game code" });
+    }
+
+    res.status(201).json({
+      success: true,
+      gameId: gameCode,
+      message: "Game created successfully",
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

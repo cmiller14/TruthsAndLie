@@ -13,7 +13,10 @@ function GameRoom() {
     setShowModal(false);
   };
 
-  return (    
+  return (
+    <div className="landing-container">
+
+     
     <div className="container py-5">
       <h1 className="text-center mb-4">🎲 Game Room</h1>
 
@@ -86,6 +89,7 @@ function GameRoom() {
         </div>
       )}
     </div>
+    </div>   
   );
 }
 

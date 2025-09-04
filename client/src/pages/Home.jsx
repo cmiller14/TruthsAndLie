@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import JoinModal from "../components/JoinModal";
 import CreateModal from "../components/CreateModal";
+import { ApiContext } from "../utils/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 
 
@@ -10,16 +12,27 @@ function Home() {
   const [gameCode, setGameCode] = useState("");
   const [createdCode, setCreatedCode] = useState("");
 
+  const api = useContext(ApiContext);
+
   const handleJoin = () => {
     alert(`Joining game with code: ${gameCode}`);
     setShowJoin(false);
     setGameCode("");
   };
 
-  const handleCreate = () => {
-    const code = Math.random().toString(36).substring(2, 7).toUpperCase();
-    setCreatedCode(code);
-    setShowCreate(true);
+  const handleCreate = async () => {
+    // const code = Math.random().toString(36).substring(2, 7).toUpperCase();
+    // setCreatedCode(code);
+    // setShowCreate(true);
+    try {
+      const res = await api.get(`${API_URL}/api/games`); // 👈 call backend
+      if (res.success) {
+        setCreatedCode(res.gameId);
+        setShowCreate(true);
+      }
+    } catch (err) {
+      console.error("Error creating game:", err);
+    }
   };
 
   return (

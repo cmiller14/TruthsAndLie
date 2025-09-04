@@ -7,7 +7,7 @@ import {
 
 const router = express.Router();
 
-router.post("/games", createGameController); // POST /api/games
+router.get("/games", createGameController); // GET /api/games
 router.post("/games/:gameCode/players", addPlayerController); // POST /api/games/:gameCode/players
 router.post("/games/:gameCode/questions", addQuestionController); // POST /api/games/:gameCode/questions
 
