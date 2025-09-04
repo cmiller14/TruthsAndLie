@@ -1,4 +1,4 @@
-import { createGame, addPlayer, addQuestion } from "../models/gameModel.js";
+import { createGame, addPlayer, addQuestion, getGame } from "../models/gameModel.js";
 
 // Utility to generate a random game ID
 function generateGameCode(length = 6) {
@@ -33,6 +33,21 @@ export const createGameController = async (req, res) => {
       gameId: gameCode,
       message: "Game created successfully",
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getGameController = async (req, res) => {
+  try {
+    const { gameCode } = req.params;
+    const game = await getGame(gameCode);
+
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+
+    res.status(200).json(game);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

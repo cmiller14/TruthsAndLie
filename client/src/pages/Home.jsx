@@ -21,11 +21,8 @@ function Home() {
   };
 
   const handleCreate = async () => {
-    // const code = Math.random().toString(36).substring(2, 7).toUpperCase();
-    // setCreatedCode(code);
-    // setShowCreate(true);
     try {
-      const res = await api.get(`${API_URL}/api/games`); // 👈 call backend
+      const res = await api.get(`${API_URL}/api/games`);
       if (res.success) {
         setCreatedCode(res.gameId);
         setShowCreate(true);

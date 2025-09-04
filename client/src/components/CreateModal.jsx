@@ -1,7 +1,15 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function CreateModal({ show, onClose, createdCode }) {
-  if (!show) return null; // Don’t render if not visible
+  const navigate = useNavigate();
+
+  if (!show) return null;
+
+  const handleGoToGame = () => {
+    onClose();
+    navigate(`/game/${createdCode}`);
+  };
 
   return (
     <div className="modal fade show d-block" tabIndex="-1" role="dialog">
@@ -21,6 +29,11 @@ function CreateModal({ show, onClose, createdCode }) {
             <h3 className="fw-bold">{createdCode}</h3>
           </div>
 
+          <div className="modal-footer">
+            <button className="btn btn-success" onClick={handleGoToGame}>
+              Go to Game Room
+            </button>
+          </div>
           <div className="modal-footer">
             <button className="btn btn-success" onClick={onClose}>
               OK

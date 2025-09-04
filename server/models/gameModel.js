@@ -1,5 +1,13 @@
 import { db } from "../config/firebase.js";
 
+export async function getGame(gameCode) {
+  const gameRef = db.collection("games").doc(gameCode);
+  const snapshot = await gameRef.get();
+
+  if (!snapshot.exists) return null;
+  return snapshot.data();
+}
+
 export async function createGame(gameCode) {
     const gameRef = db.collection("games").doc(gameCode);
 
