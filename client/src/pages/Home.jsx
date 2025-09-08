@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import JoinModal from "../components/JoinModal";
 import CreateModal from "../components/CreateModal";
 import { ApiContext } from "../utils/api";
@@ -13,11 +14,23 @@ function Home() {
   const [createdCode, setCreatedCode] = useState("");
 
   const api = useContext(ApiContext);
+  const navigate = useNavigate();
 
-  const handleJoin = () => {
-    alert(`Joining game with code: ${gameCode}`);
-    setShowJoin(false);
-    setGameCode("");
+  const handleJoin = async (code, playerName) => {
+    try {
+      const name = {
+        name: playerName,
+      }
+      const res = api.post(`${API_URL}/api/games/${code}/players`, name)
+
+      navigate(`/game/${code}`, { state: { playerName } });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to join game. Try again.");
+    } finally {
+      setShowJoin(false);
+      setGameCode("");
+    }
   };
 
   const handleCreate = async () => {

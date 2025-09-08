@@ -11,3 +11,4 @@
 * deploy the front end and backend
     * probably use vercel since it is free
 * make sure to have some sort of way to limit the reads and writes to my database so that I don't get charged for it
+* get the web sockets to work

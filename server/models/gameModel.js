@@ -1,11 +1,23 @@
 import { db } from "../config/firebase.js";
+import admin from "firebase-admin";
+import { v4 as uuidv4 } from "uuid";
 
 export async function getGame(gameCode) {
   const gameRef = db.collection("games").doc(gameCode);
   const snapshot = await gameRef.get();
 
   if (!snapshot.exists) return null;
-  return snapshot.data();
+
+  const gameData = snapshot.data();
+
+  // 🔹 Fetch players subcollection
+  const playersSnap = await gameRef.collection("players").get();
+  const players = playersSnap.docs.map(doc => doc.data());
+
+  return {
+    ...gameData,
+    players, // attach players array
+  };
 }
 
 export async function createGame(gameCode) {
@@ -20,7 +32,6 @@ export async function createGame(gameCode) {
     const newGame = {
         id: gameCode,
         questions: [],
-        players: [],
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
     };
@@ -30,15 +41,22 @@ export async function createGame(gameCode) {
 }
 
 export async function addPlayer(gameCode, player) {
-  const gameRef = db.collection("games").doc(gameCode);
+  const playerId = uuidv4(); // unique player id
 
-  await gameRef.update({
-    players: admin.firestore.FieldValue.arrayUnion({
-      ...player,
-      score: 0,
-      joinedAt: new Date(),
-    }),
+  const playerRef = db
+    .collection("games")
+    .doc(gameCode)
+    .collection("players")
+    .doc(playerId);
+
+  await playerRef.set({
+    id: playerId,
+    ...player,
+    score: 0,
+    joinedAt: new Date(),
   });
+
+  return playerId;
 }
 
 export async function addQuestion(gameCode, question) {
