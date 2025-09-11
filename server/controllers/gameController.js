@@ -58,9 +58,6 @@ export const addPlayerController = async (req, res) => {
     const { gameCode } = req.params;
     const { name } = req.body;
 
-    console.log(gameCode);
-    console.log(name);
-
     if (!name) return res.status(400).json({ error: "name is required" });
 
     await addPlayer(gameCode, { name });

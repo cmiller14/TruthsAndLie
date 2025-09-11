@@ -61,11 +61,30 @@ export async function addPlayer(gameCode, player) {
 
 export async function addQuestion(gameCode, question) {
   const gameRef = db.collection("games").doc(gameCode);
-
+  question.answers = shuffleObject(question.answers);
   await gameRef.update({
     questions: admin.firestore.FieldValue.arrayUnion({
       ...question,
       createdAt: new Date(),
     }),
   });
+}
+
+function shuffleObject(obj) {
+  // Get all keys
+  const keys = Object.keys(obj);
+
+  // Shuffle keys (Fisher–Yates)
+  for (let i = keys.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [keys[i], keys[j]] = [keys[j], keys[i]];
+  }
+
+  // Build a new object with shuffled key order
+  const shuffled = {};
+  keys.forEach((key) => {
+    shuffled[key] = obj[key];
+  });
+
+  return shuffled;
 }

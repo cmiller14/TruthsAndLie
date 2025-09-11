@@ -1,50 +1,82 @@
-// GameRoom.jsx
 import React, { useState, useEffect, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { ApiContext } from "../utils/api";
+import { io } from "socket.io-client";
+import PlayersList from "../components/PlayerList";
+import QuestionsList from "../components/QuestionsList";
+import AddQuestionModal from "../components/AddQuestionModal";
+
 const API_URL = import.meta.env.VITE_API_URL;
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_URL;
 
 function GameRoom() {
-  const { gameCode } = useParams(); // get from /game/:gameCode
-  const [game, setGame] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [newQuestion, setNewQuestion] = useState("");
+  const { gameCode } = useParams();
+  const location = useLocation();
+  const playerName = location.state?.playerName || "Anonymous";
 
   const api = useContext(ApiContext);
 
-  // Fetch game from backend
+  const [game, setGame] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [socket, setSocket] = useState(null);
+  const [questionData, setQuestionData] = useState({
+    text: "",
+    answers: {"truth":"", "false1":"", "false2":""}, // truth, false1, false2
+  });
+
+  // Fetch initial game data
   useEffect(() => {
     const fetchGame = async () => {
       try {
         const res = await api.get(`${API_URL}/api/games/${gameCode}`);
-        console.log(res);
-
-        if (res.id) {
-          setGame(res);
-        } else {
-          console.error("Error fetching game:", res);
-        }
+        if (res.id) setGame(res);
+        else console.error("Game not found:", res);
       } catch (err) {
-        console.error("Request failed:", err);
+        console.error("Failed to fetch game:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchGame();
-  }, [gameCode]);
+  }, [api, gameCode]);
 
-  // Add question locally for now (can be wired to backend later)
-  const handleAddQuestion = () => {
-    if (!newQuestion.trim()) return;
+  // Initialize socket connection
+  useEffect(() => {
+    const s = io(SOCKET_URL);
+    setSocket(s);
 
-    setGame({
-      ...game,
-      questions: [...(game.questions || []), { text: newQuestion.trim() }],
+    s.emit("joinRoom", { gameCode, playerName });
+
+    s.on("newQuestion", (question) => {
+      setGame((prev) => ({
+        ...prev,
+        questions: [...(prev.questions || []), question],
+      }));
     });
 
-    setNewQuestion("");
+    s.on("playerJoined", ({ playerName }) => {
+      setGame((prev) => ({
+        ...prev,
+        players: [...(prev.players || []), { name: playerName, score: 0 }],
+      }));
+    });
+
+    return () => s.disconnect();
+  }, [gameCode, playerName]);
+
+  const handleAddQuestion = () => {
+    if (!questionData.text.trim() || !socket) return;
+
+    const questionObj = {
+      ...questionData,
+      author: playerName,
+    };
+
+    socket.emit("addQuestion", { gameCode, question: questionObj });
+
+    // Reset form
+    setQuestionData({ text: "", answers: {"truth":"", "false1":"", "false2":""} });
     setShowModal(false);
   };
 
@@ -56,87 +88,34 @@ function GameRoom() {
       <div className="container py-5">
         <h1 className="text-center mb-4">🎲 Game Room: {game.id}</h1>
 
-        {/* Players List */}
-        <div className="shadow-card mb-4">
-          <h3 className="mb-3">Players</h3>
-          {game.players?.length === 0 ? (
-            <p className="text-muted">No players have joined yet.</p>
-          ) : (
-            <ul className="list-group">
-              {game.players.map((p, i) => (
-                <li key={i} className="list-group-item">
-                  {p.name || "Unnamed Player"} — Score: {p.score}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <PlayersList players={game.players} />
 
-        {/* Add Question Button */}
         <div className="text-center mb-4">
-          <button
-            className="btn btn-primary btn-lg"
-            onClick={() => setShowModal(true)}
-          >
+          <button className="btn btn-primary btn-lg" onClick={() => setShowModal(true)}>
             ➕ Add Question
           </button>
         </div>
 
-        {/* Questions List */}
-        <div className="shadow-card">
-          <h3 className="mb-3">Questions</h3>
-          {game.questions?.length === 0 ? (
-            <p className="text-muted">No questions yet. Add one to get started!</p>
-          ) : (
-            <ul className="list-group">
-              {game.questions.map((q, i) => (
-                <li key={i} className="list-group-item">
-                  {q.text || q}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <QuestionsList
+          questions={game.questions}
+          onSubmitAnswer={(qIndex, answer) => {
+            // Example: send through socket
+            socket.emit("submitAnswer", {
+              gameCode,
+              questionIndex: qIndex,
+              answer,
+              playerName,
+            });
+          }}
+        />
 
-        {/* Add Question Modal */}
-        {showModal && (
-          <div className="modal fade show d-block" tabIndex="-1" role="dialog">
-            <div className="modal-dialog modal-dialog-centered" role="document">
-              <div className="modal-content shadow-card">
-                <div className="modal-header">
-                  <h5 className="modal-title">Add a Question</h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setShowModal(false)}
-                  ></button>
-                </div>
-
-                <div className="modal-body">
-                  <textarea
-                    className="form-control"
-                    rows="3"
-                    placeholder="Type your question here..."
-                    value={newQuestion}
-                    onChange={(e) => setNewQuestion(e.target.value)}
-                  />
-                </div>
-
-                <div className="modal-footer">
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button className="btn btn-primary" onClick={handleAddQuestion}>
-                    Add Question
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <AddQuestionModal
+          show={showModal}
+          onClose={() => setShowModal(false)}
+          onAdd={handleAddQuestion}
+          questionData={questionData}
+          setQuestionData={setQuestionData}
+        />
       </div>
     </div>
   );

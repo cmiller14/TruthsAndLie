@@ -6,9 +6,6 @@ export function registerGameEvents(io, socket) {
   socket.on("joinRoom", async ({ gameCode, playerName }) => {
     try {
       socket.join(gameCode);
-
-      await addPlayer(gameCode, { name: playerName });
-
       socket.to(gameCode).emit("playerJoined", { playerName });
     } catch (err) {
       console.error("Error in joinRoom:", err);
