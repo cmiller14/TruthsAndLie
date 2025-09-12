@@ -1,7 +1,4 @@
-* players can join an existing game
 * create a link from the create game pop up to then transition to the game room
-* post questions to the game room
-* add question button and dialog in the game room
 * add a leaderboard to the game room
 * only allow players to answer a question once
 * need a scoring system in place

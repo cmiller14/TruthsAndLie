@@ -1,5 +1,5 @@
 // sockets/gameSocket.js
-import { addQuestion, addPlayer } from "../models/gameModel.js";
+import { addQuestion, addPlayer, submitAnswer } from "../models/gameModel.js";
 
 export function registerGameEvents(io, socket) {
   // Join a game room
@@ -21,6 +21,27 @@ export function registerGameEvents(io, socket) {
     } catch (err) {
       console.error("Error in addQuestion:", err);
       socket.emit("error", { message: "Failed to add question." });
+    }
+  });
+}
+
+export function submitAnswerHandler(io, socket) {
+  socket.on("submitAnswer", async ({ gameCode, questionId, answer, playerId }) => {
+    try {
+        console.log(gameCode);
+        console.log(questionId);
+        console.log(answer);
+        console.log(playerId);
+      const updatedPlayer = await submitAnswer(gameCode, questionId, answer, playerId);
+      // Broadcast updated score to all players
+      io.to(gameCode).emit("playerScoreUpdated", {
+        playerId,
+        score: updatedPlayer.score,
+        isCorrect,
+      });
+    } catch (err) {
+      console.error("Error handling submitAnswer:", err);
+      socket.emit("errorMessage", { message: "Failed to submit answer" });
     }
   });
 }

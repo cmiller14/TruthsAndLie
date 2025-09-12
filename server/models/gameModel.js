@@ -14,9 +14,14 @@ export async function getGame(gameCode) {
   const playersSnap = await gameRef.collection("players").get();
   const players = playersSnap.docs.map(doc => doc.data());
 
+  // Fetch questions subcollection
+  const questionSnap = await gameRef.collection("questions").get();
+  const questions = questionSnap.docs.map(doc => doc.data());
+
   return {
     ...gameData,
-    players, // attach players array
+    players,
+    questions,
   };
 }
 
@@ -59,14 +64,58 @@ export async function addPlayer(gameCode, player) {
   return playerId;
 }
 
-export async function addQuestion(gameCode, question) {
+export async function submitAnswer(gameCode, questionId, answer, playerId) {
+  console.log(gameCode);
   const gameRef = db.collection("games").doc(gameCode);
+  const questionRef = gameRef.collection("questions").doc(questionId);
+  const playerRef = gameRef.collection("players").doc(playerId);
+
+  // Fetch question
+  const questionSnap = await questionRef.get();
+  if (!questionSnap.exists) {
+    return socket.emit("errorMessage", { message: "Question not found" });
+  }
+  const question = questionSnap.data();
+
+  // Check if player already answered
+  if (question.answeredBy?.includes(playerId)) {
+    return socket.emit("errorMessage", { message: "You already answered this question" });
+  }
+
+  // Determine if answer is correct
+  const isCorrect = answer === question.answers.truth;
+
+  if (isCorrect) {
+    await playerRef.update({
+      score: admin.firestore.FieldValue.increment(1),
+    });
+  }
+
+  // Mark player as having answered
+  await questionRef.update({
+    answeredBy: admin.firestore.FieldValue.arrayUnion(playerId),
+  });
+
+  // Fetch updated player
+  const playerSnap = await playerRef.get();
+  const updatedPlayer = playerSnap.data();
+  return updatedPlayer;
+}
+
+export async function addQuestion(gameCode, question) {
+
+  const questionId = uuidv4();
+  const questionsRef = db.collection("games").doc(gameCode).collection("questions").doc(questionId);
+
+  // Shuffle the answers but keep the key structure
   question.answers = shuffleObject(question.answers);
-  await gameRef.update({
-    questions: admin.firestore.FieldValue.arrayUnion({
-      ...question,
-      createdAt: new Date(),
-    }),
+
+  // Add a new doc with auto-generated ID
+  await questionsRef.set({
+    id: questionId,
+    ...question,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    answeredBy: [], // track which players have answered
   });
 }
 

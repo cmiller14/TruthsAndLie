@@ -5,24 +5,15 @@ function QuestionsList({ questions, onSubmitAnswer }) {
   const [selectedAnswer, setSelectedAnswers] = useState({});
 
   const handleSelect = (qIndex, answer) => {
-    setSelectedAnswers((prev) => {
-      // Toggle off if already selected
-      if (prev[qIndex] === answer) {
-        const updated = { ...prev };
-        delete updated[qIndex]; // remove the selection
-        return updated;
-      }
-      // Otherwise set the new answer
-      return {
-        ...prev,
-        [qIndex]: answer,
-      };
-    });
+    setSelectedAnswers((prev) => ({
+      ...prev,
+      [qIndex]: answer,
+    }));
   };
 
-  const handleSubmit = (qIndex) => {
+  const handleSubmit = (qIndex, qId) => {
     if (!selectedAnswer[qIndex]) return;
-    onSubmitAnswer(qIndex, selectedAnswer[qIndex]);
+    onSubmitAnswer(qId, selectedAnswer[qIndex]);
   };
 
   return (
@@ -58,7 +49,7 @@ function QuestionsList({ questions, onSubmitAnswer }) {
               <button
                 className="btn btn-sm btn-primary mt-2"
                 disabled={!selectedAnswer[i]}
-                onClick={() => handleSubmit(i)}
+                onClick={() => handleSubmit(i, q.id)}
               >
                 Submit Answer
               </button>
@@ -71,5 +62,4 @@ function QuestionsList({ questions, onSubmitAnswer }) {
 }
 
 export default QuestionsList;
-
 

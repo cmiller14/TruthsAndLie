@@ -30,6 +30,7 @@ function GameRoom() {
     const fetchGame = async () => {
       try {
         const res = await api.get(`${API_URL}/api/games/${gameCode}`);
+        console.log(res);
         if (res.id) setGame(res);
         else console.error("Game not found:", res);
       } catch (err) {
@@ -61,6 +62,15 @@ function GameRoom() {
         players: [...(prev.players || []), { name: playerName, score: 0 }],
       }));
     });
+
+    s.on("playerScoreUpdated", ({ playerId, score, isCorrect }) => {
+    setGame((prev) => ({
+      ...prev,
+      players: prev.players.map((p) =>
+        p.id === playerId ? { ...p, score } : p
+      ),
+    }));
+  });
 
     return () => s.disconnect();
   }, [gameCode, playerName]);
@@ -99,6 +109,10 @@ function GameRoom() {
         <QuestionsList
           questions={game.questions}
           onSubmitAnswer={(qIndex, answer) => {
+            console.log(qIndex);
+            console.log(answer);
+            console.log(playerName);
+            
             // Example: send through socket
             socket.emit("submitAnswer", {
               gameCode,
