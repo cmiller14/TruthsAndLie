@@ -21,9 +21,10 @@ function Home() {
       const name = {
         name: playerName,
       }
-      const res = api.post(`${API_URL}/api/games/${code}/players`, name)
-
-      navigate(`/game/${code}`, { state: { playerName } });
+      const res = await api.post(`${API_URL}/api/games/${code}/players`, name)
+      const playerId = await res.id
+      console.log(playerId);
+      navigate(`/game/${code}`, { state: { playerName, playerId} });
     } catch (err) {
       console.error(err);
       alert("Failed to join game. Try again.");

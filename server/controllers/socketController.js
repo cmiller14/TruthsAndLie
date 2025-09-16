@@ -1,5 +1,5 @@
 // controllers/socketController.js
-import { registerGameEvents, submitAnswerHandler } from "../sockets/gameSocket.js";
+import { registerGameEvents } from "../sockets/gameSocket.js";
 import { registerChatEvents } from "../sockets/chatSocket.js";
 
 export function registerSocketHandlers(io) {
@@ -8,7 +8,6 @@ export function registerSocketHandlers(io) {
 
     // Register different domains
     registerGameEvents(io, socket);
-    submitAnswerHandler(io, socket);
     registerChatEvents(io, socket);
 
     // Handle disconnect

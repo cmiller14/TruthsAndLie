@@ -60,8 +60,8 @@ export const addPlayerController = async (req, res) => {
 
     if (!name) return res.status(400).json({ error: "name is required" });
 
-    await addPlayer(gameCode, { name });
-    res.status(200).json({ message: "Player added" });
+    const playerId = await addPlayer(gameCode, { name });
+    res.status(200).json({ message: "Player added", id: playerId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

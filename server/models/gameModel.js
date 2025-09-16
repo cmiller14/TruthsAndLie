@@ -65,7 +65,6 @@ export async function addPlayer(gameCode, player) {
 }
 
 export async function submitAnswer(gameCode, questionId, answer, playerId) {
-  console.log(gameCode);
   const gameRef = db.collection("games").doc(gameCode);
   const questionRef = gameRef.collection("questions").doc(questionId);
   const playerRef = gameRef.collection("players").doc(playerId);
@@ -87,7 +86,7 @@ export async function submitAnswer(gameCode, questionId, answer, playerId) {
 
   if (isCorrect) {
     await playerRef.update({
-      score: admin.firestore.FieldValue.increment(1),
+      score: admin.firestore.FieldValue.increment(10),
     });
   }
 
@@ -99,7 +98,7 @@ export async function submitAnswer(gameCode, questionId, answer, playerId) {
   // Fetch updated player
   const playerSnap = await playerRef.get();
   const updatedPlayer = playerSnap.data();
-  return updatedPlayer;
+  return {updatedPlayer, isCorrect};
 }
 
 export async function addQuestion(gameCode, question) {

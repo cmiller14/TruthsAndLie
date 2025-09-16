@@ -13,6 +13,7 @@ function GameRoom() {
   const { gameCode } = useParams();
   const location = useLocation();
   const playerName = location.state?.playerName || "Anonymous";
+  const playerId = location.state?.playerId;
 
   const api = useContext(ApiContext);
 
@@ -30,7 +31,6 @@ function GameRoom() {
     const fetchGame = async () => {
       try {
         const res = await api.get(`${API_URL}/api/games/${gameCode}`);
-        console.log(res);
         if (res.id) setGame(res);
         else console.error("Game not found:", res);
       } catch (err) {
@@ -97,6 +97,8 @@ function GameRoom() {
     <div className="landing-container">
       <div className="container py-5">
         <h1 className="text-center mb-4">🎲 Game Room: {game.id}</h1>
+        <h3 className="text-center mb-4">Player: {playerName}</h3>
+        <h3 className="text-center mb-4">ID: {playerId}</h3>
 
         <PlayersList players={game.players} />
 
@@ -109,16 +111,11 @@ function GameRoom() {
         <QuestionsList
           questions={game.questions}
           onSubmitAnswer={(qIndex, answer) => {
-            console.log(qIndex);
-            console.log(answer);
-            console.log(playerName);
-            
-            // Example: send through socket
             socket.emit("submitAnswer", {
               gameCode,
-              questionIndex: qIndex,
+              questionId: qIndex,
               answer,
-              playerName,
+              playerId: playerId,
             });
           }}
         />
