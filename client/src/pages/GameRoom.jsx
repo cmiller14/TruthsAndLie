@@ -21,9 +21,10 @@ function GameRoom() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [socket, setSocket] = useState(null);
+  const [answeredQuestions, setAnsweredQuestions] = useState([]);
   const [questionData, setQuestionData] = useState({
     text: "",
-    answers: {"truth":"", "false1":"", "false2":""}, // truth, false1, false2
+    answers: {"truth":"", "false1":"", "false2":""},
   });
 
   // Fetch initial game data
@@ -47,7 +48,7 @@ function GameRoom() {
     const s = io(SOCKET_URL);
     setSocket(s);
 
-    s.emit("joinRoom", { gameCode, playerName });
+    s.emit("joinRoom", { gameCode, playerId: playerId, playerName });
 
     s.on("newQuestion", (question) => {
       setGame((prev) => ({
@@ -98,7 +99,6 @@ function GameRoom() {
       <div className="container py-5">
         <h1 className="text-center mb-4">🎲 Game Room: {game.id}</h1>
         <h3 className="text-center mb-4">Player: {playerName}</h3>
-        <h3 className="text-center mb-4">ID: {playerId}</h3>
 
         <PlayersList players={game.players} />
 
@@ -117,7 +117,12 @@ function GameRoom() {
               answer,
               playerId: playerId,
             });
+            setAnsweredQuestions(prev => {
+              if (prev.includes(qIndex)) return prev; // don’t add duplicates
+              return [...prev, qIndex];
+            });
           }}
+          answeredQuestions={answeredQuestions}
         />
 
         <AddQuestionModal

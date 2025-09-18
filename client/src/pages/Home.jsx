@@ -23,7 +23,6 @@ function Home() {
       }
       const res = await api.post(`${API_URL}/api/games/${code}/players`, name)
       const playerId = await res.id
-      console.log(playerId);
       navigate(`/game/${code}`, { state: { playerName, playerId} });
     } catch (err) {
       console.error(err);

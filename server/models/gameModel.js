@@ -72,13 +72,13 @@ export async function submitAnswer(gameCode, questionId, answer, playerId) {
   // Fetch question
   const questionSnap = await questionRef.get();
   if (!questionSnap.exists) {
-    return socket.emit("errorMessage", { message: "Question not found" });
+    throw "Question not found!";
   }
   const question = questionSnap.data();
 
   // Check if player already answered
   if (question.answeredBy?.includes(playerId)) {
-    return socket.emit("errorMessage", { message: "You already answered this question" });
+    throw "You already answered this question"
   }
 
   // Determine if answer is correct

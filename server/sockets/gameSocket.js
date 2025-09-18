@@ -1,17 +1,31 @@
 // sockets/gameSocket.js
 import { addQuestion, addPlayer, submitAnswer } from "../models/gameModel.js";
+import gameRegistry from '../models/GameRegistry.js';
 
 export function registerGameEvents(io, socket) {
   // Join a game room
-  socket.on("joinRoom", async ({ gameCode, playerName }) => {
-    try {
-      socket.join(gameCode);
+  socket.on("joinRoom", async ({ gameCode, playerId, playerName }) => {
+  try {
+    socket.join(gameCode);
+
+    // Get or create the game object
+    const game = gameRegistry.getGame(gameCode);
+
+    // Check if player already exists
+    if (!game.hasPlayer(playerId)) {
+      game.addPlayer(playerId);
+
+      // Notify others only if it's a new player
       socket.to(gameCode).emit("playerJoined", { playerName });
-    } catch (err) {
-      console.error("Error in joinRoom:", err);
-      socket.emit("error", { message: "Failed to join game." });
+    } else {
+      console.log(`Player ${playerId} already in game ${gameCode}`);
     }
-  });
+
+  } catch (err) {
+    console.error("Error in joinRoom:", err);
+    socket.emit("error", { message: "Failed to join game." });
+  }
+});
 
   // Add a question
   socket.on("addQuestion", async ({ gameCode, question }) => {
