@@ -12,6 +12,8 @@ function Home() {
   const [showCreate, setShowCreate] = useState(false);
   const [gameCode, setGameCode] = useState("");
   const [createdCode, setCreatedCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
 
   const api = useContext(ApiContext);
   const navigate = useNavigate();
@@ -34,6 +36,7 @@ function Home() {
   };
 
   const handleCreate = async () => {
+    setIsLoading(true);            // show spinner immediately
     try {
       const res = await api.get(`${API_URL}/api/games`);
       if (res.success) {
@@ -42,8 +45,12 @@ function Home() {
       }
     } catch (err) {
       console.error("Error creating game:", err);
+      alert("Failed to create game. Try again.");
+    } finally {
+      setIsLoading(false);         // hide spinner once finished
     }
   };
+
 
   return (
     <div className="landing-container">
@@ -58,6 +65,23 @@ function Home() {
           Create a Game
         </button>
       </div>
+
+      {isLoading && (
+        <div
+          className="modal fade show"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content p-5 text-center">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="mt-3 mb-0">Creating your game...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <JoinModal
         show={showJoin}
