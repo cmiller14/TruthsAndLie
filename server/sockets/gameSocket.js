@@ -16,7 +16,7 @@ export function registerGameEvents(io, socket) {
       game.addPlayer(playerId);
 
       // Notify others only if it's a new player
-      socket.to(gameCode).emit("playerJoined", { playerName });
+      socket.to(gameCode).emit("playerJoined", { playerName, id: playerId });
     } else {
       console.log(`Player ${playerId} already in game ${gameCode}`);
     }

@@ -57,10 +57,10 @@ function GameRoom() {
       }));
     });
 
-    s.on("playerJoined", ({ playerName }) => {
+    s.on("playerJoined", ({ playerName, id }) => {
       setGame((prev) => ({
         ...prev,
-        players: [...(prev.players || []), { name: playerName, score: 0 }],
+        players: [...(prev.players || []), { name: playerName, score: 0 , id}],
       }));
     });
 
