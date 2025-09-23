@@ -30,8 +30,8 @@ export function registerGameEvents(io, socket) {
   // Add a question
   socket.on("addQuestion", async ({ gameCode, question }) => {
     try {
-      await addQuestion(gameCode, question);
-      io.to(gameCode).emit("newQuestion", question);
+      const questionData = await addQuestion(gameCode, question);
+      io.to(gameCode).emit("newQuestion", questionData);
     } catch (err) {
       console.error("Error in addQuestion:", err);
       socket.emit("error", { message: "Failed to add question." });

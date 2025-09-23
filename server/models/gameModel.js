@@ -102,20 +102,28 @@ export async function submitAnswer(gameCode, questionId, answer, playerId) {
 }
 
 export async function addQuestion(gameCode, question) {
-
   const questionId = uuidv4();
-  const questionsRef = db.collection("games").doc(gameCode).collection("questions").doc(questionId);
+  const questionsRef = db
+    .collection("games")
+    .doc(gameCode)
+    .collection("questions")
+    .doc(questionId);
 
   // Shuffle the answers but keep the key structure
   question.answers = shuffleObject(question.answers);
 
-  // Add a new doc with auto-generated ID
-  await questionsRef.set({
+  const questionData = {
     id: questionId,
     ...question,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    answeredBy: [], // track which players have answered
-  });
+    answeredBy: [],
+  };
+
+  // Write to Firestore
+  await questionsRef.set(questionData);
+
+  // Return the local version (note: createdAt is still a FieldValue here)
+  return questionData;
 }
 
 function shuffleObject(obj) {
