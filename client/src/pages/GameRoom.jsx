@@ -64,13 +64,17 @@ function GameRoom() {
       }));
     });
 
-    s.on("playerScoreUpdated", ({ playerId, score, isCorrect }) => {
+    s.on("playerScoreUpdated", ({ playerId, score, isCorrect, questionId }) => {
     setGame((prev) => ({
       ...prev,
       players: prev.players.map((p) =>
         p.id === playerId ? { ...p, score } : p
       ),
     }));
+    setAnsweredQuestions(prev => {
+              if (prev.includes(questionId)) return prev; // don’t add duplicates
+              return [...prev, {questionId, isCorrect}];
+            });
   });
 
     return () => s.disconnect();
@@ -116,10 +120,6 @@ function GameRoom() {
               questionId: qIndex,
               answer,
               playerId: playerId,
-            });
-            setAnsweredQuestions(prev => {
-              if (prev.includes(qIndex)) return prev; // don’t add duplicates
-              return [...prev, qIndex];
             });
           }}
           answeredQuestions={answeredQuestions}

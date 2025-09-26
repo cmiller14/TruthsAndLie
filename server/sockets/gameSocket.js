@@ -46,6 +46,7 @@ export function registerGameEvents(io, socket) {
         playerId,
         score: updatedPlayerRes.updatedPlayer.score,
         isCorrect: updatedPlayerRes.isCorrect,
+        questionId,
       });
     } catch (err) {
       console.error("Error handling submitAnswer:", err);
